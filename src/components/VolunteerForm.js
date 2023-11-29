@@ -1,52 +1,60 @@
-import React, { useState } from "react";
-
-const VolunteerForm = ({ onSubmit }) => {
-  const [formData, setFormData] = useState({
-    name: "",
-    contact: "",
-    location: "",
-    languages: [],
-    availability: [],
-  });
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSelectChange = (e) => {
-    const selectedOptions = Array.from(
-      e.target.selectedOptions,
-      (option) => option.value
-    );
-    setFormData({ ...formData, [e.target.name]: selectedOptions });
-  };
+import React, { useEffect, useRef } from 'react';
+import Choices from 'choices.js';
+import 'choices.js/public/assets/styles/choices.min.css';
+import Header from "./Header";
+const MultiSelectDropdown = () => {
+  const selectRef = useRef(null);
+  const selectedRef = useRef(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const formData = {
+      name: e.target.name.value,
+      contact: e.target.contact.value,
+      location: e.target.location.value,
+      languages: selectRef.current.value,
+      availability: selectedRef.current.value,
+    };
+
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+      redirect: 'follow',
+    };
+
     try {
-      const response = await fetch(
-        "http://localhost:8000/api/volunteer/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
-      const data = await response.json();
-      console.log("Volunteer registered:", data);
-      // Assuming onSubmit triggers some callback to refresh the list of volunteers
-      onSubmit(formData);
+      const response = await fetch("https://tfibackend-9apo.onrender.com/api/volunteer/register", requestOptions);
+      const result = await response.text();
+      console.log(result);
     } catch (error) {
-      console.error("Error registering volunteer:", error);
+      console.error('Error:', error);
     }
   };
 
+  useEffect(() => {
+    const choices = new Choices(selectRef.current, {
+      removeItemButton: true,
+    });
+
+    const choice = new Choices(selectedRef.current, {
+      removeItemButton: true,
+    });
+
+    return () => {
+      choices.destroy();
+      choice.destroy();
+    };
+  }, []);
+
   return (
-    <div className="container mt-3 containerborder center">
-      <h2 className="mb-4 center">Volunteer Registration Form</h2>
+    <>
+    <Header/>
+     <div className="container mt-3 containerborder center">
+      <h2 className="mb-4 mt-3 center">Volunteer Registration Form</h2>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="name">Name:</label>
@@ -55,7 +63,6 @@ const VolunteerForm = ({ onSubmit }) => {
             className="form-control"
             id="name"
             name="name"
-            onChange={handleChange}
             required
           />
         </div>
@@ -66,7 +73,6 @@ const VolunteerForm = ({ onSubmit }) => {
             className="form-control"
             id="contact"
             name="contact"
-            onChange={handleChange}
             required
           />
         </div>
@@ -77,7 +83,6 @@ const VolunteerForm = ({ onSubmit }) => {
             className="form-control"
             id="location"
             name="location"
-            onChange={handleChange}
             required
           />
         </div>
@@ -85,90 +90,45 @@ const VolunteerForm = ({ onSubmit }) => {
           <div>
             <label htmlFor="languages">Languages:</label>
           </div>
-          <div>
-          <select class="selectpicker" multiple data-live-search="true">
-              <option value="option1">Option 1</option>
-              <option value="option2">Option 2</option>
-              <option value="option3">Option 3</option>
-            </select>
-          </div>
-
-          {/* <div className="btn-group dropend">
-            <button
-              type="button"
-              className="btn btn-secondary dropdown-toggle"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              Select Languages
-            </button>
-            <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton">
-              <li>
-                <input
-                  type="checkbox"
-                  id="hindiCheckbox"
-                  value="Hindi"
-                  onChange={handleSelectChange}
-                  checked={formData.languages.includes("Hindi")}
-                />
-                <label htmlFor="hindiCheckbox"> Hindi</label>
-              </li>
-              <li>
-                <input
-                  type="checkbox"
-                  id="englishCheckbox"
-                  value="English"
-                  onChange={handleSelectChange}
-                  checked={formData.languages.includes("English")}
-                />
-                <label htmlFor="englishCheckbox"> English</label>
-              </li>
-            </ul>
-          </div> */}
+          <select
+            ref={selectRef}
+            className="form-control choices-multiple"
+            multiple
+          >
+            <option></option>
+            <option value="Hindi">Hindi</option>
+            <option value="English">English</option>
+            <option value="Kanada">Kanada</option>
+            <option value="Tamil">Tamil</option>
+            <option value="Gujrati">Gujrati</option>
+            <option value="Telgu">Telgu</option>
+          </select>
         </div>
         <div className="form-group">
           <label htmlFor="availability">Availability:</label>
-          <div className="btn-group dropend">
-            <button
-              type="button"
-              className="btn btn-secondary dropdown-toggle"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              Select Availability
-            </button>
-            <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton">
-              <li>
-                <input
-                  type="checkbox"
-                  id="sundayCheckbox"
-                  value="Sunday"
-                  onChange={handleSelectChange}
-                  checked={formData.availability.includes("Sunday")}
-                />
-                <label htmlFor="sundayCheckbox"> Sunday</label>
-              </li>
-              <li>
-                <input
-                  type="checkbox"
-                  id="mondayCheckbox"
-                  value="Monday"
-                  onChange={handleSelectChange}
-                  checked={formData.availability.includes("Monday")}
-                />
-                <label htmlFor="mondayCheckbox"> Monday</label>
-              </li>
-              {/* Add more days as needed */}
-            </ul>
-          </div>
+          <select
+            ref={selectedRef}
+            className="form-control choices-multiple"
+            multiple
+          >
+            <option></option>
+            <option value="Sunday">Sunday</option>
+            <option value="Monday">Monday</option>
+            <option value="Tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
+            <option value="Saturday">Saturday</option>
+          </select>
         </div>
 
-        <button type="submit" className="btn btn-primary">
+        <button type="submit" className="btn btn-primary mt-3 mb-3">
           Submit
         </button>
       </form>
-    </div>
+    </div></>
+   
   );
 };
 
-export default VolunteerForm;
+export default MultiSelectDropdown;

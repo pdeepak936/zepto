@@ -59,39 +59,17 @@ import { BrowserRouter as Router, Route, Link, Routes } from 'react-router-dom';
 import VolunteerForm from './components/VolunteerForm';
 import VolunteerList from './components/VolunteerList';
 import './App.css';
-
-// Import Bootstrap styles
 import 'bootstrap/dist/css/bootstrap.min.css';
+import Adminlogin from './components/Adminlogin';
 
 const App = () => {
   return (
     <Router>
-      <div className="container mt-3">
-        <nav className="navbar navbar-expand-lg navbar-light bg-light">
-          <Link className="navbar-brand" to="/">
-            Teach For India
-          </Link>
-          <div className="collapse navbar-collapse">
-            <ul className="navbar-nav mr-auto">
-              <li className="nav-item">
-                <Link className="nav-link" to="/volunteer-form">
-                  Volunteer Form
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/volunteer-list">
-                  Volunteer List
-                </Link>
-              </li>
-            </ul>
-          </div>
-        </nav>
-
         <Routes>
-          <Route path="/volunteer-form" element={<VolunteerForm />} />
+          <Route path="/" element={<VolunteerForm />} />
           <Route path="/volunteer-list" element={<VolunteerList />} />
+          <Route path="/admin" element={<Adminlogin />} />
         </Routes>
-      </div>
     </Router>
   );
 };
